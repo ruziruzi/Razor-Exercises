@@ -1,8 +1,60 @@
 ﻿@{
     Layout = "~/_Layout.cshtml";
     Page.Title = string.Format("Razor - {0}", "Exercise 02_A");
+
+    var artistarg = Request.Form["artistArg"];
+    var thebutton = Request.Form["theButton"];
 }
 
 @section banner {
     <h1>@Page.Title</h1>
 }
+@if (IsPost)
+{
+
+    if (thebutton.Equals("reset"))
+    {
+        <p style="color:orangered">The Reset Button was just Pressed</p>
+        artistarg = "";
+    }
+    else
+    {
+        if (string.IsNullOrEmpty(artistarg))
+        {
+            <p style="color:orangered">Please enter a partial artist name!</p>
+        }
+        else
+        {
+            var db = Database.Open("CHINOOK");
+
+            string sqlcommand1 = "SELECT ArtistId FROM Artists WHERE name like @0 ORDER BY Name";
+            var partialstring = "%" + artistarg + "%";
+            var results = db.Query(sqlcommand1, partialstring);
+            if (results.Count() == 0)
+            {
+                <p style="color:orangered">There was no record returned from the database</p>
+                artistarg = "";
+            }
+            else
+            {
+                Response.Redirect("Exercise02_B.cshtml?cid=" + artistarg);
+            }
+        }
+
+    }
+}
+
+
+<form id="theform" method="post">
+    <div class="row">
+        <div class="col-3">
+            <div class="offset-1">
+                <label id="lblartistArg" for="artistArg">Enter a partial artist name: </label>&nbsp;&nbsp;
+                <input type="text" name="artistArg" id="artistArg" value="@artistarg" placeholder="partial artist name" />
+                <br /><br />
+                <button type="submit" id="theButton" name="theButton" value="submit" class="btn btn-primary">Fetch</button>&nbsp;&nbsp;
+                <button type="submit" id="theButton" name="theButton" value="reset" class="btn btn-light">Reset</button>
+            </div>
+        </div>
+    </div>
+</form>
