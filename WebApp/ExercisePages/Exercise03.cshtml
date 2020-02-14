@@ -4,7 +4,7 @@
 
     var albumtitle = "";
     var artistid = "0";
-    var releaseyear = "0";
+    var releaseyear = "";
     var releaselabel = "";
 
     var db = Database.Open("CHINOOK");
@@ -16,8 +16,8 @@
         Validator.Required("Album Title is required!"),
         Validator.StringLength(160, 0, "Album Title limit is 160 characters!"));
 
-    Validation.Add("ArtistID",
-        Validator.Range(1,artistlist.Count(),"Please Select an ArtistID"));
+    Validation.Add("ArtistList",
+        Validator.Range(1,artistlist.Count(),"Please Select an Artist!!"));
 
     Validation.Add("ReleaseYear",
         Validator.Required("Release Year is required!"),
@@ -45,7 +45,7 @@
         <p style="color:orangered">You pressed the clear button</p>
         albumtitle = "";
         artistid = "0";
-        releaseyear = "0";
+        releaseyear = "";
         releaselabel = "";
     }
     else
@@ -54,12 +54,12 @@
         {
             try
             {
-                <ul>
-                    <li>@albumtitle</li>
-                    <li>@artistid</li>
-                    <li>@releaseyear</li>
-                    <li>@releaselabel</li>
-                </ul>
+                var inscommand = "INSERT INTO Albums (Title, ArtistId, ReleaseYear, ReleaseLabel)"
+                    +"VALUES(@0,@1,@2,@3)";
+                db.Execute(inscommand,albumtitle,artistid,releaseyear,string.IsNullOrEmpty(releaselabel) ? null : releaselabel);
+                <div class="col-12 text-center">
+                    <p style="color:green">Album has been Added!</p>
+                </div>
             }
             catch(Exception ex)
             {
@@ -93,7 +93,15 @@ else
                 <option value="0">Select . . . </option>
                 @foreach (var artist in artistlist)
                 {
-                    <option>@artist.ArtistId &nbsp; @artist.Name</option>
+                    if (artist.ArtistId.ToString() == artistid)
+                    {
+                        <option value="@artist[0]" selected>@artist[1]</option>
+                    }
+                    else
+                    {
+                        <option value="@artist[0]">@artist[1]</option>
+                    }
+                    //<option value="@artist.ArtistId"> @artist.Name</option>
                 }
             </select>
         </div><br />
@@ -101,7 +109,7 @@ else
             <label id="lblReleaseYear" for="ReleaseYear">Release Year</label>
         </div>
         <div class="col text-left">
-            <input type="number" name="ReleaseYear" value="@releaseyear" />
+            <input type="text" name="ReleaseYear" value="@releaseyear" />
         </div>
         <div class="col text-right">
             <label id="idReleaseLabel" for="ReleaseLabel">Release Label</label>
@@ -115,8 +123,9 @@ else
     </div>
     <div class="row">
         <div class="col-12 text-center">
-            <input type="submit" id="FormButton" name="FormButton" class="btn btn-primary" value="Add" />
-            <input type="submit" id="FormButton" name="FormButton" class="btn btn-light" value="Clear" />
+            <input type="submit" id="AddButton" name="FormButton" class="btn btn-primary" value="Add" />
+            <input type="submit" id="ClearButton" name="FormButton" class="btn btn-light" value="Clear" />
         </div>
     </div>
+
 </form>
