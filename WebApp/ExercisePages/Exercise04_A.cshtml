@@ -1,0 +1,47 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    Page.Title = string.Format("Razor - {0}", "Exercise 04_A");
+
+    var albumsearch = Request.Form["AlbumSearch"];
+
+    var db = Database.Open("CHINOOK");
+    var partialsearchstring = "%" + albumsearch + "%";
+
+    var queryStatement = "SELECT AlbumId, Title, ArtistId, ReleaseYear, ReleaseLabel FROM Albums WHERE Title like @0";
+
+    var queryAlbums = db.Query(queryStatement,partialsearchstring);
+}
+
+@section banner {
+    <h1>@Page.Title</h1>
+}
+
+<form id="theForm" action="" method="post">
+    <div class="col-sm-3">
+        <label id="forAlbumSearch">Album Name: </label>
+        <input type="text" name="AlbumSearch" value="@albumsearch"/><br /><br />
+        <button type="submit" class="btn btn-primary" name="Search" id="theSearch">Search</button>
+        <br />
+    </div>
+</form>
+
+<div class="col-sm-8">
+    @if (IsPost)
+    {
+        if (albumsearch.IsEmpty())
+        {
+            <p><strong><span style="color:orangered">Enter a partial Album Name to search!</span></strong></p>
+        }
+        else
+        {
+            if (queryAlbums.Count() == 0)
+            {
+                <p><strong><span style="color:orangered">No results found.</span></strong></p>
+            }
+            else
+            {
+                Response.Redirect("Exercise04_B.cshtml?pid=" + albumsearch);
+            }
+        }
+    }
+</div>

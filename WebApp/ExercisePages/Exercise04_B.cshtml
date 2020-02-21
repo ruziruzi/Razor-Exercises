@@ -1,0 +1,43 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    Page.Title = string.Format("Razor - {0}", "Exercise 04_B");
+
+    var pid = Request.QueryString["pid"];
+    <p>You searched for:  @pid</p>
+
+    if (string.IsNullOrEmpty(pid))
+    {
+        Response.Redirect("Exercise04_A.cshtml");
+    }
+
+    var db = Database.Open("Chinook");
+    var partialstring = "%" + pid + "%";
+    var albumquery = "SELECT AlbumId, Title, ArtistId, ReleaseYear, ReleaseLabel FROM Albums WHERE Title like @0 ORDER BY Title";
+    var albuminfo = db.Query(albumquery,partialstring);
+
+    var grid = new WebGrid(albuminfo, rowsPerPage:5);
+}
+
+@section banner {
+    <h1>@Page.Title</h1>
+}
+
+<div class="offset-1">
+    <div class="col-11">
+        @grid.GetHtml("table table-bordered table striped table-hover",
+       mode:WebGridPagerModes.All,
+       lastText:"Last",
+       firstText:"First",
+       columns: grid.Columns(
+           grid.Column(columnName:"AlbumId",header:"Album ID"),
+           grid.Column(columnName:"Title"),
+           grid.Column(columnName:"ArtistId", header:"Artist ID"),
+           grid.Column(columnName:"ReleaseYear"),
+           grid.Column(columnName:"ReleaseLabel"),
+           grid.Column(header:"", format:
+           @<text>
+            <a href="~/ExercisePages/Exercise04_C.cshtml?pid=@item.AlbumId">Edit</a>
+            </text>)
+           ))
+    </div>
+</div>
